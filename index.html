@@ -1,222 +1,431 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>打貓咪遊戲</title>
-        <link rel="icon" sizes="8x8" href="kitty.png">
-        <meta charset = "utf-8">
-        <meta content="Jayson;打貓咪遊戲">
-		<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
-    </head>
-    <body align="center" style="background-image: url('./101.jpeg');background-repeat: no-repeat;background-size: 100% 400%;">
-        <div style="background-color:rgb(217, 255, 0);">
-            <a style="font-size: 36px;" title="1.打到目標得分
-2.非目標失敗">遊戲說明</a>
-            <table align="center">
-                <tr>
-                    <th>怪物樣子</th>
-                    <td><img style="width: 50px;height: 50px;" src="kitty.png"></td>
-                    <td><img style="width: 50px;height: 50px;" src="dog.png"></td>
-                </tr>
-                <tr>
-                    <th>擊殺目標</th>
-                    <td>O</td>
-                    <td>X</td>
-                </tr>
-            </table>
-            <h3>遊戲難度</h3>
-            <form id ="whichlevel">
-                <label><input type="radio" name="level" value="easy">簡單</label>
-                <label><input type="radio" name="level" value="normal" checked>一般</label>
-                <label><input type="radio" name="level" value="hard">困難</label>
-            </form>
-            <button onclick="start()">開始遊戲</button>
-            <button onclick ="refresh()">重新一局</button>
-            <br><a id="score">grate:0</a>
-            <a id="time">time:60</a>
-        </div>
-        <div style="cursor: url('./4.ico'),auto;position: absolute;height: 60%;width: 100%;">
-            <img id="demo1">
-            <img id="demo2">
-            <img id="demo3">
-            <img id="demo4">
-            <map name="workmap1">
-                <area shape="circle" coords="0,0,100" onclick="hit1()">
-            </map>
-            <map name="workmap2">
-                <area shape="circle" coords="0,0,100" onclick="hit2()">
-            </map>
-            <map name="workmap3">
-                <area shape="circle" coords="0,0,100" onclick="hit3()">
-            </map>
-            <map name="workmap4">
-                <area shape="circle" coords="0,0,100" onclick="hit4()">
-            </map>
-            <map name="workmap5">
-                <area shape="circle" coords="0,0,100" onclick="hit5()">
-            </map>
-        </div>
-        <script>
-            function getRandom(min,max)
+<html lang="en">
+<head>
+    <title>搶綠寶磚大作戰</title>
+    <link rel="icon" href="images/stone.png">
+    <meta content="jayson;搶綠寶磚大作戰">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="CSS_PiKing.css">
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1,user-scalable
+    =no">
+</head>
+<script src="JavaScript_Functions_PiKing.js"></script>
+<body onload="StartGame()">
+    <button id="restart" onclick="refresh()" style="font-size: 20px; font-family: Consolas; position: fixed; top: 243px;left: 280px;display: none;">Restart</button>
+    <button id="next" onclick="next()" style="font-size: 20px; font-family: Consolas; position: fixed; top: 200px;left: 310px;">Next</button>
+    <script>
+        //遊戲空間轉換設定
+        var room = 0;
+        var audio = new Audio("sounds/m.mp3");
+        var audio2 = new Audio("sounds/n.mp3");
+        function next()
+        {
+            if(room==0)
             {
-                 return Math.floor(Math.random()*(max-min+1))+min;
-            };
-            var count=60;
-            var click = false;
-            function start()
+                room=1;
+                document.getElementById("next").style.display="none";
+            }
+        }
+        //遊戲初始物品設定
+        function StartGame()
+        {
+            GameArea.start(660,280,10);
+            Background = new object(800, 300, "images/background.png", 0, 0,"image");
+            Player = new object(30, 30, "images/player.png", 100, 250,"image");
+            Score=new object("30px","consolas","orange",270,40,"text");
+            GameArea.newscore=0;
+            GameArea.timer = 0;
+            Gold = [];
+            Gold2 = [];
+            Gold3 = [];
+            Enemy = [];
+            Enemy2 = [];
+            Enemy3 = [];
+            Boss = [];
+            LobbyText=new object("50px","Consolas","blue",150,100,"text");
+            LeftBtn = new object(30, 30, "images/leftbutton.png", 20, 200, "image");
+            RightBtn = new object(30, 30, "images/rightbutton.png", 80, 200, "image");            
+        }
+        //遊戲不斷執行設定
+        function LoopGame()
+        {
+            if(room==0)
             {
-                if(click==false)
+                GameArea.clear();
+                Background.newShow();
+                LobbyText.text="搶綠寶磚大作戰";
+                LobbyText.newShow();
+            }
+            else if(room==1)
+            {
+                //碰撞事件
+                for(i=0;i<Gold.length;i+=1)
                 {
-                    var timer=null;
-                    timer=setInterval(function ()
-                    {
-                        if(count>0)
-                        {
-                            count=count-1;
-                            document.getElementById('time').innerHTML="time:"+count
-                            var randomimg1=getRandom(0,1);
-                            var randomimg2=getRandom(0,1);
-                            var randomimg3=getRandom(0,1);
-                            var randomimg4=getRandom(0,1);
-                            var img1="none";
-                            var img2="none";
-                            var img3="none";
-                            var img4="none";
-                            var map1="none";
-                            var map2="none";
-                            var map3="none";
-                            var map4="none";
-                            if(randomimg1==0)
-                            {
-                                img1 = "kitty.png";
-                                map1="#workmap1";
-                            }
-                            else
-                            {
-                                img1 = "dog.png";
-                                map1="#workmap5";
-                            }
-                            if(randomimg2==0)
-                            {
-                                img2 = "kitty.png";
-                                map2="#workmap2";
-                            }
-                            else
-                            {
-                                img2 = "dog.png";
-                                map2="#workmap5";
-                            }
-                            if(randomimg3==0)
-                            {
-                                img3 = "kitty.png";
-                                map3="#workmap3";
-                            }
-                            else
-                            {
-                                img3 = "dog.png";
-                                map3="#workmap5";
-                            }
-                            if(randomimg4==0)
-                            {
-                                img4 = "kitty.png";
-                                map4="#workmap4";
-                            }
-                            else
-                            {
-                                img4 = "dog.png";
-                                map4="#workmap5";
-                            }
-                            document.getElementById("demo1").src=img1;
-                            document.getElementById("demo1").useMap=map1;
-                            document.getElementById("demo2").src=img2;
-                            document.getElementById("demo2").useMap=map2;
-                            document.getElementById("demo3").src=img3;
-                            document.getElementById("demo3").useMap=map3;
-                            document.getElementById("demo4").src=img4;
-                            document.getElementById("demo4").useMap=map4;
-                            var lv=document.getElementById("whichlevel").elements["level"].value;
-                        if(lv=="easy")
-                        {
-                            document.getElementById("demo1").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo2").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo3").style="display:none"
-                            document.getElementById("demo4").style="display:none"
-                        }
-                        else if(lv=="normal")
-                        {
-                            document.getElementById("demo1").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo2").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo3").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo4").style="display:none"
-                        }
-                        else if(lv=="hard")
-                        {
-                            document.getElementById("demo1").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo2").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo3").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                            document.getElementById("demo4").style="width:40px;height:40px;margin:"+Math.ceil(Math.random()*15)+"% "+Math.ceil(Math.random()*40)+"% "+"auto "+Math.ceil(Math.random()*40)+"%"
-                        }
-                        }
-                        else
-                        {
-                            document.getElementById("demo1").style="display:none"
-                            document.getElementById("demo2").style="display:none"
-                            document.getElementById("demo3").style="display:none"
-                            document.getElementById("demo4").style="display:none" 
-                            document.getElementById("time").innerHTML="遊戲結束" 
-                        }
-                    
-                    },1000); 
+                    if (Player.collision(Gold[i]))
+                    { 
+                        Gold[i].width=0;
+                        Gold[i].height=0;
+                        Gold[i].y=350;
+                        GameArea.newscore+=1;
+                        audio.play();
+                    }
                 }
-                click=true;
+                for(i=0;i<Gold2.length;i+=1)
+                {
+                    if (Player.collision(Gold2[i]))
+                    { 
+                        Gold2[i].width=0;
+                        Gold2[i].height=0;
+                        Gold2[i].y=350;
+                        GameArea.newscore+=2;
+                        audio.play();
+                    }
+                }
+                for(i=0;i<Gold3.length;i+=1)
+                {
+                    if (Player.collision(Gold3[i]))
+                    { 
+                        Gold3[i].width=0;
+                        Gold3[i].height=0;
+                        Gold3[i].y=350;
+                        GameArea.newscore+=10;
+                        audio.play();
+                    }
+                }
+                for(i=0;i<Enemy.length;i+=1)
+                {
+                    if (Player.collision(Enemy[i]))
+                    { 
+                        Enemy[i].width=0;
+                        Enemy[i].height=0;
+                        Enemy[i].y=350;
+                        GameArea.newscore-=1;
+                        audio2.play();
+                    }
+                }
+                for(i=0;i<Enemy2.length;i+=1)
+                {
+                    if (Player.collision(Enemy2[i]))
+                    { 
+                        Enemy2[i].width=0;
+                        Enemy2[i].height=0;
+                        Enemy2[i].y=350;
+                        GameArea.newscore-=5;
+                        audio2.play();
+                    }
+                }
+                for(i=0;i<Enemy3.length;i+=1)
+                {
+                    if (Player.collision(Enemy3[i]))
+                    { 
+                        Enemy3[i].width=0;
+                        Enemy3[i].height=0;
+                        Enemy3[i].y=350;
+                        GameArea.newscore-=14;
+                        audio2.play();
+                    }
+                }
+                for(i=0;i<Boss.length;i+=1)
+                {
+                    if (Player.collision(Boss[i]))
+                    { 
+                        audio2.play();
+                        GameArea.stop();
+                        document.getElementById("restart").style.display="";
+                        return;
+                    }
+                }
+                GameArea.clear();
+                Background.newShow();
+                if (GameArea.key_is_pressed && GameArea.key_is_pressed[37]) {move(Player,'left',3);Player.image.src="images/player.png";}
+                if (GameArea.key_is_pressed && GameArea.key_is_pressed[39]) {move(Player,'right',3);Player.image.src="images/player2.png";}
+                if (GameArea.key_is_pressed && GameArea.key_is_pressed[65]) {move(Player,'left',3);Player.image.src="images/player.png";}
+                if (GameArea.key_is_pressed && GameArea.key_is_pressed[68]) {move(Player,'right',3);Player.image.src="images/player2.png";}
+                if (LeftBtn.clicked())
+                {
+                    move(Player,'left',3);
+                    Player.image.src="images/player.png";
+                }
+                if (RightBtn.clicked())
+                {
+                    move(Player,'right',3);
+                    Player.image.src="images/player2.png";
+                }
+                LeftBtn.newShow();
+                RightBtn.newShow();
+                Player.newPosition();
+                Player.newShow();
+                //產生器
+                GameArea.timer += 1;
+                if(GameArea.newscore<=5)
+                {
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Gold.push(new object(30,30, "images/stone.png", x, y, "image"));
+                    }
+                    for(i=0;i<Gold.length;i+=1)
+                    {
+                        Gold[i].y+=1;
+                        Gold[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Enemy.push(new object(30,30, "images/enemy1.png", x, y, "image"));
+                    }
+
+                    for(i=0;i<Enemy.length;i+=1)
+                    {
+                        Enemy[i].y+=1;
+                        Enemy[i].newShow();
+                    }
+                }
+                else if(GameArea.newscore>5 && GameArea.newscore<=10 )
+                {
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Gold.push(new object(30,30, "images/stone.png", x, y, "image"));
+                    }
+                    for(i=0;i<Gold.length;i+=1)
+                    {
+                        Gold[i].y+=1;
+                        Gold[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Enemy.push(new object(30,30, "images/enemy1.png", x, y, "image"));
+                    }
+                    for(i=0;i<Enemy.length;i+=1)
+                    {
+                        Enemy[i].y+=1;
+                        Enemy[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Gold2.push(new object(30,30, "images/stone2.png", x, y, "image"));
+                    }
+                    for(i=0;i<Gold2.length;i+=1)
+                    {
+                        Gold2[i].y+=1;
+                        Gold2[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Enemy2.push(new object(30,30, "images/enemy2.png", x, y, "image"));
+                    }
+                    for(i=0;i<Enemy2.length;i+=1)
+                    {
+                        Enemy2[i].y+=1;
+                        Enemy2[i].newShow();
+                    }
+                }
+                
+                else if(GameArea.newscore>10)
+                {
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Gold.push(new object(30,30, "images/stone.png", x, y, "image"));
+                    }
+                    for(i=0;i<Gold.length;i+=1)
+                    {
+                        Gold[i].y+=1;
+                        Gold[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Enemy.push(new object(30,30, "images/enemy1.png", x, y, "image"));
+                    }
+                    for(i=0;i<Enemy.length;i+=1)
+                    {
+                        Enemy[i].y+=1;
+                        Enemy[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Gold2.push(new object(30,30, "images/stone2.png", x, y, "image"));
+                    }
+                    for(i=0;i<Gold2.length;i+=1)
+                    {
+                        Gold2[i].y+=1;
+                        Gold2[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Enemy2.push(new object(30,30, "images/enemy2.png", x, y, "image"));
+                    }
+                    for(i=0;i<Enemy2.length;i+=1)
+                    {
+                        Enemy2[i].y+=1;
+                        Enemy2[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Gold3.push(new object(30,30, "images/stone3.png", x, y, "image"));
+                    }
+                    for(i=0;i<Gold3.length;i+=1)
+                    {
+                        Gold3[i].y+=1;
+                        Gold3[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Enemy3.push(new object(30,30, "images/enemy3.png", x, y, "image"));
+                    }
+                    for(i=0;i<Enemy3.length;i+=1)
+                    {
+                        Enemy3[i].y+=1;
+                        Enemy3[i].newShow();
+                    }
+                    if (GameArea.timer == 1 || everytimer(200))
+                    {
+                        x=getRandom(30,600)
+                        y=getRandom(-50,-300)
+                        Boss.push(new object(30,30, "images/Boss.png", x, y, "image"));
+                    }
+                    for(i=0;i<Boss.length;i+=1)
+                    {
+                        Boss[i].y+=1;
+                        Boss[i].newShow();
+                    }
+                }
+
+                // if (GameArea.timer == 1 || everytimer(200))
+                // {
+                //     x=getRandom(30,600)
+                //     y=getRandom(-50,-300)
+                //     Gold2.push(new object(30,30, "images/stone2.png", x, y, "image"));
+                // }
+                // for(i=0;i<Gold2.length;i+=1)
+                // {
+                //     Gold2[i].y+=1;
+                //     Gold2[i].newShow();
+                // }
+
+                // if (GameArea.timer == 1 || everytimer(200))
+                // {
+                //     x=getRandom(30,600)
+                //     y=getRandom(-50,-300)
+                //     Gold3.push(new object(30,30, "images/stone3.png", x, y, "image"));
+                // }
+                // for(i=0;i<Gold3.length;i+=1)
+                // {
+                //     Gold3[i].y+=1;
+                //     Gold3[i].newShow();
+                // }
+
+                
+                // if (GameArea.timer == 1 || everytimer(200))
+                // {
+                //     x=getRandom(30,600)
+                //     y=getRandom(-50,-300)
+                //     Enemy2.push(new object(30,30, "images/enemy2.png", x, y, "image"));
+                // }
+
+                // for(i=0;i<Enemy2.length;i+=1)
+                // {
+                //     Enemy2[i].y+=1;
+                //     Enemy2[i].newShow();
+                // }
+                // if (GameArea.timer == 1 || everytimer(200))
+                // {
+                //     x=getRandom(30,600)
+                //     y=getRandom(-50,-300)
+                //     Enemy3.push(new object(30,30, "images/enemy3.png", x, y, "image"));
+                // }
+
+                // for(i=0;i<Enemy3.length;i+=1)
+                // {
+                //     Enemy3[i].y+=1;
+                //     Enemy3[i].newShow();
+                // }
+                //遊戲機制引用
+                border(); 
+                Score.text="SCORE:"+GameArea.newscore;
+                Score.newShow();
             }
-            var n = 0;
-            function addscore()
+        }
+        //遊戲機制
+        function border()
+        {
+            if (Player.x <= 0)
             {
-                n=n+1
-                document.getElementById("score").innerHTML =  "grate:" + n
+                Player.x = 0;
             }
-            function hit1()
+            if (Player.x >= GameArea.canvas.width - Player.width)
             {
-                document.getElementById("demo1").src='bone.png';
-                document.getElementById("demo1").useMap="";
-                addscore();
-                var audio = new Audio("cat2.mp3");
-                audio.play();
+                Player.x = GameArea.canvas.width - Player.width;
             }
-            function hit2()
+            for (i=0;i<Gold.length;i+=1)
             {
-                document.getElementById("demo2").src='bone.png';
-                document.getElementById("demo2").useMap="";
-                addscore();
-                var audio = new Audio("cat2.mp3");
-                audio.play();
+                if(Gold[i].y>=350)
+                {
+                    Gold.splice(i,1);
+                }
             }
-            function hit3()
+            for (i=0;i<Gold2.length;i+=1)
             {
-                document.getElementById("demo3").src='bone.png';
-                document.getElementById("demo3").useMap="";
-                addscore();
-                var audio = new Audio("cat2.mp3");
-                audio.play();
+                if(Gold2[i].y>=350)
+                {
+                    Gold2.splice(i,1);
+                }
             }
-            function hit4()
+            for (i=0;i<Gold3.length;i+=1)
             {
-                document.getElementById("demo4").src='bone.png';
-                document.getElementById("demo4").useMap="";
-                addscore();
-                var audio = new Audio("cat2.mp3");
-                audio.play();
+                if(Gold3[i].y>=350)
+                {
+                    Gold3.splice(i,1);
+                }
             }
-             function hit5()
+            for (i=0;i<Enemy.length;i+=1)
             {
-                start(count=0);
-                var audio = new Audio("dog2.mp3");
-                audio.play();
+                if(Enemy[i].y>=350)
+                {
+                    Enemy.splice(i,1);
+                }
             }
-            function refresh()
+            for (i=0;i<Enemy2.length;i+=1)
             {
-                window.location.reload();
+                if(Enemy2[i].y>=350)
+                {
+                    Enemy2.splice(i,1);
+                }
             }
-        </script>
-    </body>
+            for (i=0;i<Enemy3.length;i+=1)
+            {
+                if(Enemy3[i].y>=350)
+                {
+                    Enemy3.splice(i,1);
+                }
+            }
+            if(GameArea.newscore<=0)
+            {
+                GameArea.newscore=0; 
+            }
+        }
+    </script>
+</body>
 </html>
